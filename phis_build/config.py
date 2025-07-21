@@ -16,12 +16,13 @@ CONFIG_FILE = PROJECT_ROOT / 'phis_build.toml'
 
 if not CONFIG_FILE.exists():
     CONFIG_FILE.write_text(
-        """
+        encoding='utf-8',
+        data="""
 # 配置文件示例
 # 请根据实际情况修改以下内容
 project_name = "NAME"
 share_path = "\\\\192.168.a.b\\11\\22\\33"
-"""
+""",
     )
     print(f'配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。')
     exit(1)
@@ -57,7 +58,8 @@ SPEC_FILE = PROJECT_ROOT / f'{PROJECT_NAME}.spec'
 
 if not SPEC_FILE.exists():
     SPEC_FILE.write_text(
-        f"""# -*- mode: python ; coding: utf-8 -*-
+        encoding='utf-8',
+        data=f"""# -*- mode: python ; coding: utf-8 -*-
 a = Analysis(
     ['{PROJECT_NAME}.py'],
     pathex=[],
@@ -98,7 +100,7 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
 )
-"""
+""",
     )
     print(f'未找到 {SPEC_FILE}，已创建默认的 PyInstaller 配置文件。')
 
