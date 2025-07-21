@@ -12,10 +12,16 @@ def run_full_build():
     build_steps.build()
     build_steps.copy_dirs()
     target_dir = build_steps.copy_to_release_dir(version)
-    zip_file_path = build_steps.make_zip(target_dir, version)
-    
-    if '--no-copy' not in sys.argv:
-        build_steps.copy_to_share(zip_file_path)
+
+    # 根据命令行参数决定是压缩还是直接复制目录
+    if '--no-zip' in sys.argv:
+        print("检测到 --no-zip 参数，跳过压缩步骤。")
+        if '--no-copy' not in sys.argv:
+            build_steps.copy_dir_to_share(target_dir)
+    else:
+        zip_file_path = build_steps.make_zip(target_dir, version)
+        if '--no-copy' not in sys.argv:
+            build_steps.copy_to_share(zip_file_path)
     
     print("\n构建完成！")
 

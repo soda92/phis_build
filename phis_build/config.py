@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import os
 try:
     import tomllib
 except ImportError:
@@ -7,7 +8,7 @@ except ImportError:
     import toml as tomllib
 
 # --- 基本路径 ---
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(os.getcwd())
 """项目根目录"""
 
 # --- 从 config.toml 加载配置 ---

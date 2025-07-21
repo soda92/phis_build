@@ -81,6 +81,23 @@ def copy_to_share(file: Path):
     except Exception as e:
         print(f'\n警告: 复制到共享目录失败，已忽略。错误: {e}')
 
+def copy_dir_to_share(source_dir: Path):
+    """尝试将整个目录复制到网络共享位置。"""
+    try:
+        destination_dir = config.SHARE_PATH / source_dir.name
+        print(f'4. 尝试将目录复制到共享位置 {destination_dir} ...')
+
+        if destination_dir.exists():
+            print(f"警告: 目标目录 {destination_dir} 已存在。正在删除旧目录...")
+            shutil.rmtree(destination_dir)
+
+        # 使用 shutil.copytree 复制整个目录
+        shutil.copytree(source_dir, destination_dir, dirs_exist_ok=True)
+
+        print(f'\n成功将目录复制到: {destination_dir}')
+    except Exception as e:
+        print(f'\n警告: 复制目录到共享位置失败，已忽略。错误: {e}')
+
 def clean_temp_dir():
     """清理临时构建目录。"""
     if config.TEMP_DIR.exists():
