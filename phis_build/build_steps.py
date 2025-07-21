@@ -30,7 +30,12 @@ def copy_dirs():
     for d in [config.浏览器, config.浏览器配置文件, config.文档目录]:
         if d.exists():
             shutil.copytree(d, config.TEMP_DIR / d.name, dirs_exist_ok=True)
-    
+
+    bin_dir = config.TEMP_DIR / 'phis_bin'
+    # rename it to BIN
+    if bin_dir.exists():
+        bin_dir.rename(config.TEMP_DIR / 'BIN')
+
     # 移动 env.txt 到特定的子目录
     执行结果目录 = config.TEMP_DIR / '执行结果'
     执行结果目录.mkdir(exist_ok=True)

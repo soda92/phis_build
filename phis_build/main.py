@@ -1,3 +1,5 @@
+from pathlib import Path
+import shutil
 import sys
 import argparse
 from . import config, build_steps
@@ -51,6 +53,12 @@ def run_copy_only():
 def main():
     """脚本主入口，根据命令行参数选择执行流程。"""
     parser = argparse.ArgumentParser(description="PHIS 自定义构建系统。")
+
+    parser.add_argument(
+        "--get-bin",
+        action="store_true",
+        help="将浏览器二进制文件复制到当前目录。"
+    )
     
     parser.add_argument(
         '--copy-only',
@@ -69,6 +77,15 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if args.get_bin:
+        print('将浏览器二进制文件复制到当前目录...')
+        if config.浏览器.exists():
+            shutil.copytree(config.浏览器, Path.cwd() / 'BIN', dirs_exist_ok=True)
+            print('浏览器二进制文件已复制。')
+        else:
+            print(f'错误: 浏览器目录 {config.浏览器} 不存在。')
+        return
 
     if args.copy_only:
         run_copy_only()
