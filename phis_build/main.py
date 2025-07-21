@@ -12,7 +12,7 @@ except ImportError:
     import toml as tomllib
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path('.')
 
 # --- 从配置文件加载配置 ---
 try:
