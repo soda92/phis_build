@@ -46,4 +46,4 @@ VERSION_FILE = PROJECT_ROOT / 'VERSION'
 # --- 源目录 ---
 文档目录 = PROJECT_ROOT / '文档'
 浏览器配置文件 = PROJECT_ROOT / '配置文件'
-浏览器 = Path(__file__).resolve().parent.parent / 'phis_bin'
+浏览器 = PROJECT_ROOT / 'BIN'

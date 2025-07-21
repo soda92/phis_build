@@ -1,5 +1,3 @@
-from pathlib import Path
-import shutil
 import sys
 import argparse
 from . import config, build_steps
@@ -15,7 +13,7 @@ def run_full_build(no_zip: bool, no_copy: bool):
     print('开始完整构建流程...')
     build_steps.clean_temp_dir()
     config.RELEASE_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     version = read_and_update_version()
     build_steps.build()
     build_steps.copy_dirs()
@@ -55,12 +53,6 @@ def main():
     parser = argparse.ArgumentParser(description="PHIS 自定义构建系统。")
 
     parser.add_argument(
-        "--get-bin",
-        action="store_true",
-        help="将浏览器二进制文件复制到当前目录。"
-    )
-    
-    parser.add_argument(
         '--copy-only',
         action='store_true',
         help='不执行构建，仅将最新的 ZIP 包复制到共享目录。'
@@ -77,15 +69,6 @@ def main():
     )
 
     args = parser.parse_args()
-
-    if args.get_bin:
-        print('将浏览器二进制文件复制到当前目录...')
-        if config.浏览器.exists():
-            shutil.copytree(config.浏览器, Path.cwd() / 'BIN', dirs_exist_ok=True)
-            print('浏览器二进制文件已复制。')
-        else:
-            print(f'错误: 浏览器目录 {config.浏览器} 不存在。')
-        return
 
     if args.copy_only:
         run_copy_only()
