@@ -1,6 +1,6 @@
 [project]
 name = "phis-build"
-version = "2025.7.21.4"
+version = "2025.7.21.5"
 description = "custom build system"
 readme = "README.md"
 requires-python = ">=3.11"
