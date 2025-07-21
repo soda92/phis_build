@@ -13,8 +13,8 @@ wheels = [
 
 [[package]]
 name = "phis-build"
-version = "0.1.0"
-source = { virtual = "." }
+version = "2025.7.21.0"
+source = { editable = "." }
 dependencies = [
     { name = "toml" },
     { name = "tqdm" },

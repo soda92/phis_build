@@ -9,7 +9,7 @@ def read_and_update_version():
     如果最后一次构建不是今天，则修订号重置为 0。
     """
     today = date.today()
-    
+
     # 默认新版本号（当天第一次构建）
     new_version_str = f'{today.year}.{today.month}.{today.day}.0'
 
