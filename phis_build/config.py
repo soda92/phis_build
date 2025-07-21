@@ -55,6 +55,53 @@ BUILD_DIR = PROJECT_ROOT / 'build'
 SPEC_FILE = PROJECT_ROOT / f'{PROJECT_NAME}.spec'
 """PyInstaller 的 .spec 配置文件路径"""
 
+if not SPEC_FILE.exists():
+    SPEC_FILE.write_text(
+        f"""# -*- mode: python ; coding: utf-8 -*-
+a = Analysis(
+    ['{PROJECT_NAME}.py'],
+    pathex=[],
+    binaries=[],
+    datas=[
+     ('.venv/Lib/site-packages/ddddocr/common_old.onnx', 'ddddocr'),
+    ('.venv/Lib/site-packages/ddddocr/common.onnx', 'ddddocr'),
+    ('.venv/Lib/site-packages/onnxruntime/capi/onnxruntime_providers_shared.dll', 'onnxruntime\capi'),
+    ('.venv/Lib/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.pyd', 'onnxruntime\capi'),
+    ],
+    hiddenimports=[],
+    hookspath=[],
+    hooksconfig={{}},
+    runtime_hooks=[],
+    excludes=[],
+    noarchive=False,
+    optimize=0,
+)
+pyz = PYZ(a.pure)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.datas,
+    [],
+    name='{PROJECT_NAME}',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=True,
+    upx_exclude=[],
+    runtime_tmpdir=None,
+    console=True,
+    disable_windowed_traceback=False,
+    argv_emulation=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+"""
+    )
+    print(f'未找到 {SPEC_FILE}，已创建默认的 PyInstaller 配置文件。')
+
 VERSION_FILE = PROJECT_ROOT / 'VERSION'
 """存储版本号的文件"""
 
