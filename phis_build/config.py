@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import os
+
 try:
     import tomllib
 except ImportError:
@@ -10,6 +11,20 @@ except ImportError:
 # --- 基本路径 ---
 PROJECT_ROOT = Path(os.getcwd())
 """项目根目录"""
+
+CONFIG_FILE = PROJECT_ROOT / 'config.toml'
+
+if not CONFIG_FILE.exists():
+    CONFIG_FILE.write_text(
+        """
+# 配置文件示例
+# 请根据实际情况修改以下内容
+project_name = "NAME"
+share_path = "\\\\192.168.a.b\\11\\22\\33"
+"""
+    )
+    print(f'配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。')
+    exit(1)
 
 # --- 从 config.toml 加载配置 ---
 try:
@@ -21,7 +36,7 @@ except (FileNotFoundError, KeyError) as e:
     print(f"错误: 无法加载或解析 'config.toml' 文件。")
     print(f"请确保该文件存在于 '{PROJECT_ROOT}' 目录下，")
     print(f"并且包含了 'project_name' 和 'share_path' 键。")
-    print(f"详细错误: {e}")
+    print(f'详细错误: {e}')
     sys.exit(1)
 
 # --- 派生路径和常量 ---

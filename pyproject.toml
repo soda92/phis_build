@@ -25,3 +25,18 @@ exclude = ["__pycache__", "*.pyc", "*.exe~", "*.syso"]
 
 [project.scripts]
 phis_build = "phis_build.main:main"
+
+
+[tool.ruff.lint]
+ignore = [
+    "E722", # 不要使用裸 except（except:），应指定异常类型
+    "F541", # f-string 中未使用的表达式
+    "F841", # 局部变量被赋值但未使用
+    # "F401", # 导入但未使用的模块
+    "F811", # 变量或函数重复定义
+    "E731", # 不要把 lambda 表达式赋值给变量，建议用 def
+    "E402", # import 语句不在文件顶部
+]
+
+[tool.ruff.format]
+quote-style = "single"
