@@ -42,6 +42,13 @@ def copy_dirs():
     env_file_source = config.TEMP_DIR / '文档' / 'env.txt'
     if env_file_source.exists():
         shutil.move(str(env_file_source), 执行结果目录 / 'env.txt')
+    else:
+        执行结果目录.joinpath('env.txt').write_text(
+            """总操作数:3
+当前处理身份证号:
+已完成数量:0
+""", encoding='utf-8'
+        )
 
 def copy_to_release_dir(version: str) -> Path:
     """将临时目录的内容复制到带版本号的最终发布目录。"""
