@@ -21,7 +21,7 @@ if not CONFIG_FILE.exists():
 # 配置文件示例
 # 请根据实际情况修改以下内容
 project_name = "NAME"
-share_path = "\\\\192.168.a.b\\11\\22\\33"
+share_path = "//192.168.a.b/11/22/33"
 """,
     )
     print(f'配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。')
@@ -32,7 +32,7 @@ try:
     with open(CONFIG_FILE, 'rb') as f:
         _config = tomllib.load(f)
     PROJECT_NAME = _config['project_name']
-    SHARE_PATH = Path(_config['share_path'])
+    SHARE_PATH = Path(_config['share_path'].replace('/', '\\'))
 except (FileNotFoundError, KeyError) as e:
     print(f"错误: 无法加载或解析 '{CONFIG_FILE.name}' 文件。")
     print(f"请确保该文件存在于 '{PROJECT_ROOT}' 目录下，")
