@@ -26,6 +26,7 @@ exclude = ["__pycache__", "*.pyc", "*.exe~", "*.syso"]
 
 [project.scripts]
 phis_build = "phis_build.main:main"
+phis-build = "phis_build.main:main"
 
 
 [tool.ruff.lint]
