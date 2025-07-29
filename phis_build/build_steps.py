@@ -87,7 +87,7 @@ def copy_to_share(file: Path):
         print(f'\n警告: 复制到共享目录失败，已忽略。错误: {e}')
 
 def copy_dir_to_share(source_dir: Path):
-    """尝试将整个目录复制到网络共享位置。"""
+    """尝试将整个目录复制到网络共享位置，并显示进度条。"""
     try:
         destination_dir = config.SHARE_PATH / source_dir.name
         print(f'4. 尝试将目录复制到共享位置 {destination_dir} ...')
@@ -96,8 +96,25 @@ def copy_dir_to_share(source_dir: Path):
             print(f"警告: 目标目录 {destination_dir} 已存在。正在删除旧目录...")
             shutil.rmtree(destination_dir)
 
-        # 使用 shutil.copytree 复制整个目录
-        shutil.copytree(source_dir, destination_dir, dirs_exist_ok=True)
+        # 1. 获取所有文件列表和总大小
+        files_to_copy = [p for p in source_dir.rglob('*') if p.is_file()]
+        total_size = sum(p.stat().st_size for p in files_to_copy)
+
+        # 2. 创建进度条
+        with tqdm(total=total_size, unit='B', unit_scale=True, desc=f'复制 {source_dir.name}') as pbar:
+            # 3. 遍历并复制文件
+            for src_file in files_to_copy:
+                relative_path = src_file.relative_to(source_dir)
+                dest_file = destination_dir / relative_path
+
+                # 确保目标目录存在
+                dest_file.parent.mkdir(parents=True, exist_ok=True)
+
+                # 复制文件
+                shutil.copy2(src_file, dest_file)
+
+                # 更新进度条
+                pbar.update(src_file.stat().st_size)
 
         print(f'\n成功将目录复制到: {destination_dir}')
     except Exception as e:
