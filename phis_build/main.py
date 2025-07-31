@@ -16,6 +16,7 @@ def run_full_build(no_zip: bool, no_copy: bool):
 
     version = read_and_update_version()
     build_steps.build()
+    build_steps.rename_executable(version)
     build_steps.copy_dirs()
     target_dir = build_steps.copy_to_release_dir(version)
 
@@ -29,6 +30,7 @@ def run_full_build(no_zip: bool, no_copy: bool):
         if not no_copy:
             build_steps.copy_to_share(zip_file_path)
     
+    build_steps.clean_old_releases(keep=2)
     print("\n构建完成！")
 
 def run_copy_only():
@@ -60,6 +62,7 @@ def main():
     parser.add_argument(
         '--no-zip',
         action='store_true',
+        default=True,
         help='执行构建，但不创建 ZIP 压缩包，而是直接复制整个目录。'
     )
     parser.add_argument(

@@ -6,6 +6,7 @@ from pathlib import Path
 from tqdm import tqdm
 from . import config
 
+
 def build():
     """使用 PyInstaller 进行打包。"""
     print('1. 使用 PyInstaller 打包...')
@@ -23,6 +24,21 @@ def build():
         ],
         check=True,
     )
+
+
+def rename_executable(version: str):
+    """将打包好的 exe 重命名以包含版本号。"""
+    try:
+        original_exe = config.TEMP_DIR / f'{config.PROJECT_NAME}.exe'
+        if original_exe.exists():
+            new_exe_name = f'{config.PROJECT_NAME}_v{version}.exe'
+            original_exe.rename(original_exe.with_name(new_exe_name))
+            print(f'已将可执行文件重命名为: {new_exe_name}')
+        else:
+            print(f'警告: 未在 {config.TEMP_DIR} 中找到 {original_exe.name}。')
+    except Exception as e:
+        print(f'警告: 重命名可执行文件失败: {e}')
+
 
 def copy_dirs():
     """复制必要的目录（浏览器、配置文件、文档）到临时构建目录。"""
@@ -47,8 +63,10 @@ def copy_dirs():
             """总操作数:3
 当前处理身份证号:
 已完成数量:0
-""", encoding='utf-8'
+""",
+            encoding='utf-8',
         )
+
 
 def copy_to_release_dir(version: str) -> Path:
     """将临时目录的内容复制到带版本号的最终发布目录。"""
@@ -57,6 +75,7 @@ def copy_to_release_dir(version: str) -> Path:
         shutil.rmtree(target_dir)
     shutil.copytree(config.TEMP_DIR, target_dir, dirs_exist_ok=True)
     return target_dir
+
 
 def make_zip(target_dir: Path, version: str) -> Path:
     """将发布目录压缩成 zip 文件。"""
@@ -67,6 +86,7 @@ def make_zip(target_dir: Path, version: str) -> Path:
             zf.write(file, file.relative_to(target_dir.parent))
     print(f'已创建压缩包: {zip_path}')
     return zip_path
+
 
 def copy_to_share(file: Path):
     """尝试将文件复制到网络共享位置，如果失败则忽略。"""
@@ -80,7 +100,9 @@ def copy_to_share(file: Path):
         with (
             open(file, 'rb') as fsrc,
             open(destination_file, 'wb') as fdst,
-            tqdm(total=file_size, unit='B', unit_scale=True, desc=f'复制 {file.name}') as pbar,
+            tqdm(
+                total=file_size, unit='B', unit_scale=True, desc=f'复制 {file.name}'
+            ) as pbar,
         ):
             while True:
                 chunk = fsrc.read(4096 * 1024)  # 4MB chunks
@@ -93,6 +115,7 @@ def copy_to_share(file: Path):
     except Exception as e:
         print(f'\n警告: 复制到共享目录失败，已忽略。错误: {e}')
 
+
 def copy_dir_to_share(source_dir: Path):
     """尝试将整个目录复制到网络共享位置，并显示进度条。"""
     try:
@@ -100,7 +123,7 @@ def copy_dir_to_share(source_dir: Path):
         print(f'4. 尝试将目录复制到共享位置 {destination_dir} ...')
 
         if destination_dir.exists():
-            print(f"警告: 目标目录 {destination_dir} 已存在。正在删除旧目录...")
+            print(f'警告: 目标目录 {destination_dir} 已存在。正在删除旧目录...')
             shutil.rmtree(destination_dir)
 
         # 1. 获取所有文件列表和总大小
@@ -108,7 +131,9 @@ def copy_dir_to_share(source_dir: Path):
         total_size = sum(p.stat().st_size for p in files_to_copy)
 
         # 2. 创建进度条
-        with tqdm(total=total_size, unit='B', unit_scale=True, desc=f'复制 {source_dir.name}') as pbar:
+        with tqdm(
+            total=total_size, unit='B', unit_scale=True, desc=f'复制 {source_dir.name}'
+        ) as pbar:
             # 3. 遍历并复制文件
             for src_file in files_to_copy:
                 relative_path = src_file.relative_to(source_dir)
@@ -127,7 +152,37 @@ def copy_dir_to_share(source_dir: Path):
     except Exception as e:
         print(f'\n警告: 复制目录到共享位置失败，已忽略。错误: {e}')
 
+
 def clean_temp_dir():
     """清理临时构建目录。"""
     if config.TEMP_DIR.exists():
         shutil.rmtree(config.TEMP_DIR)
+
+
+def clean_old_releases(keep: int = 2):
+    """清理旧的发布目录，只保留指定数量的最新版本。"""
+    try:
+        print(f'5. 清理旧的发布目录，保留最新的 {keep} 个版本...')
+
+        # 获取所有符合命名规则的发布目录
+        release_dirs = [
+            d
+            for d in config.RELEASE_DIR.iterdir()
+            if d.is_dir() and d.name.startswith(f'{config.PROJECT_NAME}_v')
+        ]
+
+        # 按修改时间降序排序（最新的在前）
+        release_dirs.sort(key=lambda d: d.stat().st_mtime, reverse=True)
+
+        # 如果目录数量超过要保留的数量，则删除多余的
+        if len(release_dirs) > keep:
+            dirs_to_delete = release_dirs[keep:]
+            print(f'将删除以下旧目录: {[str(d.name) for d in dirs_to_delete]}')
+            for d in dirs_to_delete:
+                shutil.rmtree(d)
+            print('旧目录清理完毕。')
+        else:
+            print('没有需要清理的旧目录。')
+
+    except Exception as e:
+        print(f'警告: 清理旧的发布目录失败: {e}')
