@@ -88,35 +88,37 @@ def make_zip(target_dir: Path, version: str) -> Path:
     return zip_path
 
 
-def is_share_available() -> bool:
+def get_available_share_path() -> Path | None:
     """
-    检查网络共享路径是否可访问。
-    通过尝试检查路径是否为目录来判断。
+    检查并返回第一个可访问的网络共享路径。
     """
-    if not str(config.SHARE_PATH).startswith('\\\\'):
-        print('共享路径不是一个有效的 UNC 路径，跳过检查。')
-        return True  # 假设本地路径总是可用的
-    try:
-        print(f'正在检查网络共享路径 {config.SHARE_PATH} ...')
-        # is_dir() 会尝试访问路径，如果无法访问会触发异常
-        if config.SHARE_PATH.is_dir():
-            print('网络共享路径可访问。')
-            return True
-        else:
-            print(f'警告: 共享路径 {config.SHARE_PATH} 存在但不是一个目录。')
-            return False
-    except Exception as e:
-        print(f'警告: 无法访问网络共享路径。错误: {e}')
-        return False
+    paths_to_check = [p for p in [config.SHARE_PATH, config.SHARE_PATH2] if p]
+
+    for path in paths_to_check:
+        if not str(path).startswith('\\\\'):
+            print(f'路径 {path} 不是一个有效的 UNC 路径，跳过检查。')
+            continue
+        try:
+            print(f'正在检查网络共享路径 {path} ...')
+            if path.is_dir():
+                print(f'网络共享路径 {path} 可访问。')
+                return path
+            else:
+                print(f'警告: 共享路径 {path} 存在但不是一个目录。')
+        except Exception as e:
+            print(f'警告: 无法访问网络共享路径 {path}。错误: {e}')
+
+    print('所有配置的共享路径均不可用。')
+    return None
 
 
-def copy_to_share(file: Path):
-    """尝试将文件复制到网络共享位置，如果失败则忽略。"""
+def copy_to_share(file: Path, share_path: Path):
+    """尝试将文件复制到指定的网络共享位置。"""
     try:
-        destination_file = config.SHARE_PATH / file.name
+        destination_file = share_path / file.name
         print(f'4. 尝试复制到共享目录 {destination_file} ...')
 
-        config.SHARE_PATH.mkdir(parents=True, exist_ok=True)
+        share_path.mkdir(parents=True, exist_ok=True)
         file_size = file.stat().st_size
 
         with (
@@ -138,10 +140,10 @@ def copy_to_share(file: Path):
         print(f'\n警告: 复制到共享目录失败，已忽略。错误: {e}')
 
 
-def copy_dir_to_share(source_dir: Path):
-    """尝试将整个目录复制到网络共享位置，并显示进度条。"""
+def copy_dir_to_share(source_dir: Path, share_path: Path):
+    """尝试将整个目录复制到指定的网络共享位置，并显示进度条。"""
     try:
-        destination_dir = config.SHARE_PATH / source_dir.name
+        destination_dir = share_path / source_dir.name
         print(f'4. 尝试将目录复制到共享位置 {destination_dir} ...')
 
         if destination_dir.exists():
