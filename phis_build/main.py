@@ -21,21 +21,21 @@ def run_full_build(no_zip: bool, no_copy: bool):
     target_dir = build_steps.copy_to_release_dir(version)
 
     # 检查共享路径是否可用
-    share_available = build_steps.is_share_available()
+    available_share_path = build_steps.get_available_share_path()
 
     # 根据参数和共享路径可用性决定是压缩还是直接复制目录
-    if no_zip and share_available:
+    if no_zip and available_share_path:
         print("检测到 --no-zip 参数且共享目录可用，将直接复制目录。")
         if not no_copy:
-            build_steps.copy_dir_to_share(target_dir)
+            build_steps.copy_dir_to_share(target_dir, available_share_path)
     else:
-        if no_zip and not share_available:
-            print("警告: 指定了 --no-zip 但共享目录不可用，将强制创建 ZIP 文件。")
-        
+        if no_zip and not available_share_path:
+            print("警告: 指定了 --no-zip 但所有共享目录均不可用，将强制创建 ZIP 文件。")
+
         zip_file_path = build_steps.make_zip(target_dir, version)
         if not no_copy:
-            if share_available:
-                build_steps.copy_to_share(zip_file_path)
+            if available_share_path:
+                build_steps.copy_to_share(zip_file_path, available_share_path)
             else:
                 print("共享目录不可用，跳过复制 ZIP 文件步骤。")
 
@@ -54,7 +54,14 @@ def run_copy_only():
 
         latest_zip_file = max(zip_files, key=lambda p: p.stat().st_mtime)
         print(f'找到最新的文件: {latest_zip_file.name}')
-        build_steps.copy_to_share(latest_zip_file)
+        
+        available_share_path = build_steps.get_available_share_path()
+        if available_share_path:
+            build_steps.copy_to_share(latest_zip_file, available_share_path)
+        else:
+            print('错误: 所有共享路径均不可用，无法执行复制操作。')
+            sys.exit(1)
+            
     except Exception as e:
         print(f'复制操作失败: {e}')
         sys.exit(1)
