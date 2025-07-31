@@ -88,6 +88,28 @@ def make_zip(target_dir: Path, version: str) -> Path:
     return zip_path
 
 
+def is_share_available() -> bool:
+    """
+    检查网络共享路径是否可访问。
+    通过尝试检查路径是否为目录来判断。
+    """
+    if not str(config.SHARE_PATH).startswith('\\\\'):
+        print('共享路径不是一个有效的 UNC 路径，跳过检查。')
+        return True  # 假设本地路径总是可用的
+    try:
+        print(f'正在检查网络共享路径 {config.SHARE_PATH} ...')
+        # is_dir() 会尝试访问路径，如果无法访问会触发异常
+        if config.SHARE_PATH.is_dir():
+            print('网络共享路径可访问。')
+            return True
+        else:
+            print(f'警告: 共享路径 {config.SHARE_PATH} 存在但不是一个目录。')
+            return False
+    except Exception as e:
+        print(f'警告: 无法访问网络共享路径。错误: {e}')
+        return False
+
+
 def copy_to_share(file: Path):
     """尝试将文件复制到网络共享位置，如果失败则忽略。"""
     try:

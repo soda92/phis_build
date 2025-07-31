@@ -20,16 +20,25 @@ def run_full_build(no_zip: bool, no_copy: bool):
     build_steps.copy_dirs()
     target_dir = build_steps.copy_to_release_dir(version)
 
-    # 根据参数决定是压缩还是直接复制目录
-    if no_zip:
-        print("检测到 --no-zip 参数，跳过压缩步骤。")
+    # 检查共享路径是否可用
+    share_available = build_steps.is_share_available()
+
+    # 根据参数和共享路径可用性决定是压缩还是直接复制目录
+    if no_zip and share_available:
+        print("检测到 --no-zip 参数且共享目录可用，将直接复制目录。")
         if not no_copy:
             build_steps.copy_dir_to_share(target_dir)
     else:
+        if no_zip and not share_available:
+            print("警告: 指定了 --no-zip 但共享目录不可用，将强制创建 ZIP 文件。")
+        
         zip_file_path = build_steps.make_zip(target_dir, version)
         if not no_copy:
-            build_steps.copy_to_share(zip_file_path)
-    
+            if share_available:
+                build_steps.copy_to_share(zip_file_path)
+            else:
+                print("共享目录不可用，跳过复制 ZIP 文件步骤。")
+
     build_steps.clean_old_releases(keep=2)
     print("\n构建完成！")
 
