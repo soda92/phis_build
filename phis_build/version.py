@@ -1,5 +1,6 @@
 from datetime import date
 from . import config
+import logging
 
 def read_and_update_version():
     """
@@ -27,9 +28,9 @@ def read_and_update_version():
                     new_version_str = f'{today.year}.{today.month}.{today.day}.{new_rev}'
                 # else: 新的一天，使用上面已经设置好的默认版本号
             except (ValueError, IndexError):
-                print(f"警告: VERSION 文件中的版本 '{last_version_str}' 格式无效。将从今天的日期重新开始。")
+                logging.info(f"警告: VERSION 文件中的版本 '{last_version_str}' 格式无效。将从今天的日期重新开始。")
     
     # 写入新版本号
     config.VERSION_FILE.write_text(new_version_str, encoding='utf-8')
-    print(f'版本号已更新为: {new_version_str}')
+    logging.info(f'版本号已更新为: {new_version_str}')
     return new_version_str

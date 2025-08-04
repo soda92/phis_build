@@ -1,0 +1,19 @@
+{
+    // python program
+    // 使用 IntelliSense 了解相关属性。
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "phis-build",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "phis_build",
+            "console": "integratedTerminal",
+            "args": ["--copy-only"],
+            "cwd": "C:/src/yuxin-follow-up-source-code/宇信慢病随访更新/",
+            "justMyCode": true
+        }
+    ]
+}

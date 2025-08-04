@@ -5,11 +5,12 @@ import sys
 from pathlib import Path
 from tqdm import tqdm
 from . import config
+import logging
 
 
 def build():
     """使用 PyInstaller 进行打包。"""
-    print('1. 使用 PyInstaller 打包...')
+    logging.info('1. 使用 PyInstaller 打包...')
     subprocess.run(
         [
             sys.executable,
@@ -33,16 +34,16 @@ def rename_executable(version: str):
         if original_exe.exists():
             new_exe_name = f'{config.PROJECT_NAME}_v{version}.exe'
             original_exe.rename(original_exe.with_name(new_exe_name))
-            print(f'已将可执行文件重命名为: {new_exe_name}')
+            logging.info(f'已将可执行文件重命名为: {new_exe_name}')
         else:
-            print(f'警告: 未在 {config.TEMP_DIR} 中找到 {original_exe.name}。')
+            logging.info(f'警告: 未在 {config.TEMP_DIR} 中找到 {original_exe.name}。')
     except Exception as e:
-        print(f'警告: 重命名可执行文件失败: {e}')
+        logging.info(f'警告: 重命名可执行文件失败: {e}')
 
 
 def copy_dirs():
     """复制必要的目录（浏览器、配置文件、文档）到临时构建目录。"""
-    print('2. 复制目录到 release...')
+    logging.info('2. 复制目录到 release...')
     for d in [config.浏览器, config.浏览器配置文件, config.文档目录]:
         if d.exists():
             shutil.copytree(d, config.TEMP_DIR / d.name, dirs_exist_ok=True)
@@ -80,11 +81,11 @@ def copy_to_release_dir(version: str) -> Path:
 def make_zip(target_dir: Path, version: str) -> Path:
     """将发布目录压缩成 zip 文件。"""
     zip_path = target_dir.parent / f'{config.PROJECT_NAME}_v{version}.zip'
-    print(f'3. 压缩为 {zip_path} ...')
+    logging.info(f'3. 压缩为 {zip_path} ...')
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zf:
         for file in target_dir.rglob('*'):
             zf.write(file, file.relative_to(target_dir.parent))
-    print(f'已创建压缩包: {zip_path}')
+    logging.info(f'已创建压缩包: {zip_path}')
     return zip_path
 
 
@@ -96,19 +97,19 @@ def get_available_share_path() -> Path | None:
 
     for path in paths_to_check:
         if not str(path).startswith('\\\\'):
-            print(f'路径 {path} 不是一个有效的 UNC 路径，跳过检查。')
+            logging.info(f'路径 {path} 不是一个有效的 UNC 路径，跳过检查。')
             continue
         try:
-            print(f'正在检查网络共享路径 {path} ...')
+            logging.info(f'正在检查网络共享路径 {path} ...')
             if path.is_dir():
-                print(f'网络共享路径 {path} 可访问。')
+                logging.info(f'网络共享路径 {path} 可访问。')
                 return path
             else:
-                print(f'警告: 共享路径 {path} 存在但不是一个目录。')
+                logging.info(f'警告: 共享路径 {path} 存在但不是一个目录。')
         except Exception as e:
-            print(f'警告: 无法访问网络共享路径 {path}。错误: {e}')
+            logging.info(f'警告: 无法访问网络共享路径 {path}。错误: {e}')
 
-    print('所有配置的共享路径均不可用。')
+    logging.info('所有配置的共享路径均不可用。')
     return None
 
 
@@ -116,7 +117,7 @@ def copy_to_share(file: Path, share_path: Path):
     """尝试将文件复制到指定的网络共享位置。"""
     try:
         destination_file = share_path / file.name
-        print(f'4. 尝试复制到共享目录 {destination_file} ...')
+        logging.info(f'4. 尝试复制到共享目录 {destination_file} ...')
 
         share_path.mkdir(parents=True, exist_ok=True)
         file_size = file.stat().st_size
@@ -135,19 +136,19 @@ def copy_to_share(file: Path, share_path: Path):
                 fdst.write(chunk)
                 pbar.update(len(chunk))
 
-        print(f'\n成功复制到: {destination_file}')
+        logging.info(f'\n成功复制到: {destination_file}')
     except Exception as e:
-        print(f'\n警告: 复制到共享目录失败，已忽略。错误: {e}')
+        logging.info(f'\n警告: 复制到共享目录失败，已忽略。错误: {e}')
 
 
 def copy_dir_to_share(source_dir: Path, share_path: Path):
     """尝试将整个目录复制到指定的网络共享位置，并显示进度条。"""
     try:
         destination_dir = share_path / source_dir.name
-        print(f'4. 尝试将目录复制到共享位置 {destination_dir} ...')
+        logging.info(f'4. 尝试将目录复制到共享位置 {destination_dir} ...')
 
         if destination_dir.exists():
-            print(f'警告: 目标目录 {destination_dir} 已存在。正在删除旧目录...')
+            logging.info(f'警告: 目标目录 {destination_dir} 已存在。正在删除旧目录...')
             shutil.rmtree(destination_dir)
 
         # 1. 获取所有文件列表和总大小
@@ -172,9 +173,9 @@ def copy_dir_to_share(source_dir: Path, share_path: Path):
                 # 更新进度条
                 pbar.update(src_file.stat().st_size)
 
-        print(f'\n成功将目录复制到: {destination_dir}')
+        logging.info(f'\n成功将目录复制到: {destination_dir}')
     except Exception as e:
-        print(f'\n警告: 复制目录到共享位置失败，已忽略。错误: {e}')
+        logging.info(f'\n警告: 复制目录到共享位置失败，已忽略。错误: {e}')
 
 
 def clean_temp_dir():
@@ -183,10 +184,10 @@ def clean_temp_dir():
         shutil.rmtree(config.TEMP_DIR)
 
 
-def clean_old_releases(keep: int = 2):
+def clean_old_releases(keep: int = 2, zip_and_folder=True):
     """清理旧的发布目录，只保留指定数量的最新版本。"""
     try:
-        print(f'5. 清理旧的发布目录，保留最新的 {keep} 个版本...')
+        logging.info(f'5. 清理旧的发布目录，保留最新的 {keep} 个版本...')
 
         # 获取所有符合命名规则的发布目录
         release_dirs = [
@@ -201,12 +202,23 @@ def clean_old_releases(keep: int = 2):
         # 如果目录数量超过要保留的数量，则删除多余的
         if len(release_dirs) > keep:
             dirs_to_delete = release_dirs[keep:]
-            print(f'将删除以下旧目录: {[str(d.name) for d in dirs_to_delete]}')
+            logging.info(f'将删除以下旧目录: {[str(d.name) for d in dirs_to_delete]}')
             for d in dirs_to_delete:
                 shutil.rmtree(d)
-            print('旧目录清理完毕。')
+            logging.info('旧目录清理完毕。')
         else:
-            print('没有需要清理的旧目录。')
+            logging.info('没有需要清理的旧目录。')
+
+        if zip_and_folder:
+            # 清理旧的 ZIP 文件
+            zip_files = list(config.RELEASE_DIR.glob(f'{config.PROJECT_NAME}_v*.zip'))
+            if len(zip_files) > keep:
+                zip_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+                for f in zip_files[keep:]:
+                    f.unlink()
+                logging.info('旧的 ZIP 文件清理完毕。')
+            else:
+                logging.info('没有需要清理的旧 ZIP 文件。')
 
     except Exception as e:
-        print(f'警告: 清理旧的发布目录失败: {e}')
+        logging.info(f'警告: 清理旧的构建结果失败: {e}')

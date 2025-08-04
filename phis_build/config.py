@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import os
+import logging
 
 try:
     import tomllib
@@ -25,7 +26,7 @@ share_path = "//192.168.a.b/11/22/33"
 # share_path2 = "//192.168.c.d/share" # (可选) 第二个备用共享路径
 """,
     )
-    print(f'配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。')
+    logging.info(f'配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。')
     exit(1)
 
 # --- 从 toml 加载配置 ---
@@ -37,10 +38,10 @@ try:
     _share_path2_str = _config.get('share_path2')
     SHARE_PATH2 = Path(_share_path2_str.replace('/', '\\')) if _share_path2_str else None
 except (FileNotFoundError, KeyError) as e:
-    print(f"错误: 无法加载或解析 '{CONFIG_FILE.name}' 文件。")
-    print(f"请确保该文件存在于 '{PROJECT_ROOT}' 目录下，")
-    print(f"并且包含了 'project_name' 和 'share_path' 键。")
-    print(f'详细错误: {e}')
+    logging.info(f"错误: 无法加载或解析 '{CONFIG_FILE.name}' 文件。")
+    logging.info(f"请确保该文件存在于 '{PROJECT_ROOT}' 目录下，")
+    logging.info(f"并且包含了 'project_name' 和 'share_path' 键。")
+    logging.info(f'详细错误: {e}')
     sys.exit(1)
 
 # --- 派生路径和常量 ---
@@ -105,7 +106,7 @@ exe = EXE(
 )
 """,
     )
-    print(f'未找到 {SPEC_FILE}，已创建默认的 PyInstaller 配置文件。')
+    logging.info(f'未找到 {SPEC_FILE}，已创建默认的 PyInstaller 配置文件。')
 
 VERSION_FILE = PROJECT_ROOT / 'VERSION'
 """存储版本号的文件"""
