@@ -37,9 +37,9 @@ def run_full_build(no_zip: bool, no_copy: bool):
         zip_file_path = build_steps.make_zip(target_dir, version)
         if not no_copy:
             if available_share_path:
-                build_steps.copy_to_share(zip_file_path, available_share_path)
+                build_steps.copy_dir_to_share(target_dir, available_share_path)
             else:
-                logging.info("共享目录不可用，跳过复制 ZIP 文件步骤。")
+                logging.info("共享目录不可用，跳过复制文件步骤。")
 
     build_steps.clean_old_releases(keep=2)
     logging.info("\n构建完成！")
