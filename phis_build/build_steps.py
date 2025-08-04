@@ -66,7 +66,7 @@ def copy_dirs():
     执行结果目录.mkdir(exist_ok=True)
     env_file_source = config.PROJECT_ROOT / '文档' / 'env.txt'
     if env_file_source.exists():
-        shutil.move(str(env_file_source), 执行结果目录 / 'env.txt')
+        shutil.copy(str(env_file_source), 执行结果目录 / 'env.txt')
     else:
         logging.error("cannot find env.txt")
         exit(-1)
