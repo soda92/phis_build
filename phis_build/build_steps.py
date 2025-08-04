@@ -64,17 +64,12 @@ def copy_dirs():
     # 移动 env.txt 到特定的子目录
     执行结果目录 = config.TEMP_DIR / '执行结果'
     执行结果目录.mkdir(exist_ok=True)
-    env_file_source = config.TEMP_DIR / '文档' / 'env.txt'
+    env_file_source = config.PROJECT_ROOT / '文档' / 'env.txt'
     if env_file_source.exists():
         shutil.move(str(env_file_source), 执行结果目录 / 'env.txt')
     else:
-        执行结果目录.joinpath('env.txt').write_text(
-            """总操作数:3
-当前处理身份证号:
-已完成数量:0
-""",
-            encoding='utf-8',
-        )
+        logging.error("cannot find env.txt")
+        exit(-1)
 
 
 def copy_to_release_dir(version: str) -> Path:
