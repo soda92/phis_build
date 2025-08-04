@@ -86,7 +86,7 @@ def main():
     parser.add_argument(
         '--no-zip',
         action='store_true',
-        default=True,
+        default=False,
         help='执行构建，但不创建 ZIP 压缩包，而是直接复制整个目录。'
     )
     parser.add_argument(
