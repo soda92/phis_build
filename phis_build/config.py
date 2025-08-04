@@ -71,8 +71,8 @@ a = Analysis(
     datas=[
         ('.venv/Lib/site-packages/ddddocr/common_old.onnx', 'ddddocr'),
         ('.venv/Lib/site-packages/ddddocr/common.onnx', 'ddddocr'),
-        ('.venv/Lib/site-packages/onnxruntime/capi/onnxruntime_providers_shared.dll', 'onnxruntime\capi'),
-        ('.venv/Lib/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.pyd', 'onnxruntime\capi'),
+        ('.venv/Lib/site-packages/onnxruntime/capi/onnxruntime_providers_shared.dll', 'onnxruntime/capi'),
+        ('.venv/Lib/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.pyd', 'onnxruntime/capi'),
     ],
     hiddenimports=[],
     hookspath=[],
