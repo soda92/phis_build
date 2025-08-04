@@ -5,8 +5,8 @@ from pathlib import Path
 
 def setup_logging():
     """配置日志记录，同时输出到控制台和文件。"""
-    log_dir = Path.cwd() / 'logs'
-    log_dir.mkdir(exist_ok=True)
+    log_dir = Path.cwd()
+    # log_dir.mkdir(exist_ok=True)
     log_file = log_dir / 'phis_build.log'
 
     # 获取根 logger
