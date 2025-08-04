@@ -44,9 +44,17 @@ def rename_executable(version: str):
 def copy_dirs():
     """复制必要的目录（浏览器、配置文件、文档）到临时构建目录。"""
     logging.info('2. 复制目录到 release...')
-    for d in [config.浏览器, config.浏览器配置文件, config.文档目录]:
+    for d in [config.浏览器, config.浏览器配置文件]:
         if d.exists():
             shutil.copytree(d, config.TEMP_DIR / d.name, dirs_exist_ok=True)
+
+    doc_dir = config.文档目录
+    target_doc_dir = config.TEMP_DIR / '文档'
+    if doc_dir.exists():
+        target_doc_dir.mkdir(exist_ok=True)
+        files = [i for i in doc_dir.glob('*') if ('bak' not in i.name) and (not i.name.startswith('.')) and ('env.txt' not in i.name)]
+        for file in files:
+            shutil.copy(file, target_doc_dir / file.name)
 
     bin_dir = config.TEMP_DIR / 'phis_bin'
     # rename it to BIN
