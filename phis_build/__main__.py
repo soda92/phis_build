@@ -1,5 +1,5 @@
 import argparse
-from phis_logging.logging_config import setup_logging
+from .logging_config import setup_logging
 from .main import run_full_build
 
 

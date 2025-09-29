@@ -3,7 +3,7 @@ from .get_args import get_args
 import logging
 from . import config, build_steps, build_zipapp
 from .version import read_and_update_version
-from phis_logging import setup_logging
+from .logging_config import setup_logging
 
 
 def run_full_build(no_zip: bool, no_copy: bool, use_pyz: bool = False):
