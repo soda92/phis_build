@@ -80,7 +80,8 @@ def make_package():
         shutil.copytree(p, src_dir / p.name, dirs_exist_ok=True)
 
     version_file = config.VERSION_FILE
-    shutil.copy(version_file, src_dir / "phis_build" / version_file.name)
+    if Path(src_dir / "phis_build").exists():
+        shutil.copy(version_file, src_dir / "phis_build" / version_file.name)
 
     # 复制需要的目录和文件
     dirs, files, main_py = get_sources()
