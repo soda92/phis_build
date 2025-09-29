@@ -2,22 +2,37 @@ import sys
 from pathlib import Path
 import os
 import logging
+from typing import Optional
+
+def _process_share_path(path_str: Optional[str]) -> Optional[Path]:
+    if not path_str:
+        return None
+    if sys.platform == "win32":
+        path_str = path_str.replace("/", "\\")
+    return Path(path_str)
 
 try:
-    import tomllib
+    import tomllib  # type: ignore
 except ImportError:
-    # For Python < 3.11, you might need to pip install toml
-    import toml as tomllib
+    # For Python < 3.11, you might need to pip install tomli
+    import tomli as tomllib  # type: ignore
 
 # --- 基本路径 ---
 PROJECT_ROOT = Path(os.getcwd())
 """项目根目录"""
 
-CONFIG_FILE = PROJECT_ROOT / 'phis_build.toml'
+# 项目根目录
+ROOT_DIR = Path(__file__).parent.parent.parent
+
+# 配置文件路径
+BUILD_CONFIG_PATH = ROOT_DIR / "phis_build.toml"
+VERSION_FILE = ROOT_DIR / "engine/phis_build/version.txt"
+
+CONFIG_FILE = PROJECT_ROOT / "phis_build.toml"
 
 if not CONFIG_FILE.exists():
     CONFIG_FILE.write_text(
-        encoding='utf-8',
+        encoding="utf-8",
         data="""
 # 配置文件示例
 # 请根据实际情况修改以下内容
@@ -26,43 +41,45 @@ share_path = "//192.168.a.b/11/22/33"
 # share_path2 = "//192.168.c.d/share" # (可选) 第二个备用共享路径
 """,
     )
-    logging.info(f'配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。')
+    logging.info(f"配置文件 {CONFIG_FILE} 不存在，已创建示例文件。请根据实际情况修改。")
     exit(1)
 
 # --- 从 toml 加载配置 ---
 try:
-    with open(CONFIG_FILE, 'rb') as f:
+    with open(CONFIG_FILE, "rb") as f:
         _config = tomllib.load(f)
-    PROJECT_NAME = _config['project_name']
-    SHARE_PATH = Path(_config['share_path'].replace('/', '\\'))
-    _share_path2_str = _config.get('share_path2')
-    SHARE_PATH2 = Path(_share_path2_str.replace('/', '\\')) if _share_path2_str else None
+    PROJECT_NAME = _config["project_name"]
+    APP_NAME = PROJECT_NAME
+    SHARE_PATH = _process_share_path(_config["share_path"])
+    SHARE_PATH2 = _process_share_path(_config["share_path"])
+    _linux_share_path_str = _config.get("linux_share_path")
+    LINUX_SHARE_PATH = Path(_linux_share_path_str) if _linux_share_path_str else None
 except (FileNotFoundError, KeyError) as e:
     logging.info(f"错误: 无法加载或解析 '{CONFIG_FILE.name}' 文件。")
     logging.info(f"请确保该文件存在于 '{PROJECT_ROOT}' 目录下，")
     logging.info(f"并且包含了 'project_name' 和 'share_path' 键。")
-    logging.info(f'详细错误: {e}')
+    logging.info(f"详细错误: {e}")
     sys.exit(1)
 
 # --- 派生路径和常量 ---
-RELEASE_DIR = PROJECT_ROOT / 'releases'
+RELEASE_DIR = PROJECT_ROOT / "releases"
 """存放最终发布版本和压缩包的目录"""
 
-TEMP_DIR = RELEASE_DIR / 'temp'
+TEMP_DIR = RELEASE_DIR / "temp"
 """用于构建过程的临时目录"""
 
-DIST_DIR = PROJECT_ROOT / 'dist'
+DIST_DIR = PROJECT_ROOT / "dist"
 """PyInstaller 的默认输出目录 (在此脚本中未使用，但作为参考)"""
 
-BUILD_DIR = PROJECT_ROOT / 'build'
+BUILD_DIR = PROJECT_ROOT / "build"
 """PyInstaller 的工作目录"""
 
-SPEC_FILE = PROJECT_ROOT / f'{PROJECT_NAME}.spec'
+SPEC_FILE = PROJECT_ROOT / f"{PROJECT_NAME}.spec"
 """PyInstaller 的 .spec 配置文件路径"""
 
 if not SPEC_FILE.exists():
     SPEC_FILE.write_text(
-        encoding='utf-8',
+        encoding="utf-8",
         data=f"""# -*- mode: python ; coding: utf-8 -*-
 a = Analysis(
     ['{PROJECT_NAME}.py'],
@@ -102,12 +119,12 @@ exe = EXE(
 )
 """,
     )
-    logging.info(f'未找到 {SPEC_FILE}，已创建默认的 PyInstaller 配置文件。')
+    logging.info(f"未找到 {SPEC_FILE}，已创建默认的 PyInstaller 配置文件。")
 
-VERSION_FILE = PROJECT_ROOT / 'VERSION'
+VERSION_FILE = PROJECT_ROOT / "VERSION"
 """存储版本号的文件"""
 
 # --- 源目录 ---
-文档目录 = PROJECT_ROOT / '文档'
-浏览器配置文件 = PROJECT_ROOT / '配置文件'
-浏览器 = PROJECT_ROOT / 'BIN'
+文档目录 = PROJECT_ROOT / "文档"
+浏览器配置文件 = PROJECT_ROOT / "配置文件"
+浏览器 = PROJECT_ROOT / "BIN"
