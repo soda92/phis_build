@@ -3,8 +3,11 @@ from .get_args import get_args
 import logging
 from . import config, build_steps, build_zipapp
 from .version import read_and_update_version
-from .logging_config import setup_logging
-
+try:
+    from phis_logging.logging_config import setup_logging
+except ImportError:
+    from .logging_config import setup_logging
+from .main import run_full_build
 
 def run_full_build(no_zip: bool, no_copy: bool, use_pyz: bool = False):
     """

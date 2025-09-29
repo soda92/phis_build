@@ -1,5 +1,8 @@
 import argparse
-from .logging_config import setup_logging
+try:
+    from phis_logging.logging_config import setup_logging
+except ImportError:
+    from .logging_config import setup_logging
 from .main import run_full_build
 
 
