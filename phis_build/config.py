@@ -4,12 +4,14 @@ import os
 import logging
 from typing import Optional
 
+
 def _process_share_path(path_str: Optional[str]) -> Optional[Path]:
     if not path_str:
         return None
     if sys.platform == "win32":
         path_str = path_str.replace("/", "\\")
     return Path(path_str)
+
 
 try:
     import tomllib  # type: ignore
@@ -57,7 +59,7 @@ try:
 except (FileNotFoundError, KeyError) as e:
     logging.info(f"错误: 无法加载或解析 '{CONFIG_FILE.name}' 文件。")
     logging.info(f"请确保该文件存在于 '{PROJECT_ROOT}' 目录下，")
-    logging.info(f"并且包含了 'project_name' 和 'share_path' 键。")
+    logging.info("并且包含了 'project_name' 和 'share_path' 键。")
     logging.info(f"详细错误: {e}")
     sys.exit(1)
 

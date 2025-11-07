@@ -7,7 +7,6 @@ from tqdm import tqdm
 from . import config
 import logging
 from typing import Optional
-from .get_args import get_args
 
 
 def build():
@@ -40,7 +39,7 @@ def rename_executable(version: str):
         else:
             logging.info(f"警告: 未在 {config.TEMP_DIR} 中找到 {original_exe.name}。")
     except Exception as e:
-        logging.info(f"警告: 重命名可执行文件失败: {e}")
+        logging.exception(f"警告: 重命名可执行文件失败: {e}")
 
 
 def rename_pyz(version: str):
@@ -77,23 +76,31 @@ def copy_dirs(use_pyz: bool = False):
 
 
 def _create_batch_files(target_dir: Path, version: str):
-    """在目标目录中创建 .bat 启动脚本"""
+    """在目标目录中根据模板创建 .bat 启动脚本。"""
     logging.info("正在创建启动脚本...")
-    args = get_args()
     try:
-        # 2. 创建配置工具启动脚本
-        if not args.no_config_tool:
-            config_bat_path = target_dir / "配置工具.bat"
-            config_bat_src = Path(__file__).parent.joinpath("config_tool.bat")
-            shutil.copy(config_bat_src, config_bat_path)
-        no_gui_bat_path = target_dir / "无界面运行.bat"
-        no_gui_bat_src = Path(__file__).parent.joinpath("no_gui_run.bat")
-        shutil.copy(no_gui_bat_src, no_gui_bat_path)
+        template_path = Path(__file__).parent / "run_template.bat"
+        if not template_path.exists():
+            logging.error(f"启动脚本模板未找到: {template_path}")
+            return
 
-    except FileNotFoundError as e:
-        logging.error(f"创建 .bat 文件失败: 找不到配置文件 {e.filename}")
+        template_content = template_path.read_text(encoding="utf-8")
+        template_content = template_content.replace("{VERSION}", version)
+
+        # 1. 创建 GUI / 配置工具启动脚本 (无参数)
+        gui_content = template_content.replace("{ARGS}", "")
+        (target_dir / "启动数字员工.bat").write_text(
+            gui_content, encoding="utf-8-sig", newline="\r\n"
+        )
+
+        # # 2. 创建无界面运行脚本
+        # cli_content = template_content.replace("{ARGS}", "--run")
+        # (target_dir / "无界面运行.bat").write_text(
+        #     cli_content, encoding="utf-8-sig", newline="\r\n"
+        # )
+
     except Exception as e:
-        logging.error(f"创建 .bat 文件时发生未知错误: {e}")
+        logging.error(f"创建 .bat 文件时发生未知错误: {e}", exc_info=True)
 
 
 def copy_to_release_dir(version: str) -> Path:
@@ -148,7 +155,7 @@ def get_available_share_path() -> Optional[Path]:
             else:
                 logging.info(f"警告: 共享路径 {path} 存在但不是一个目录。")
         except Exception as e:
-            logging.info(f"警告: 无法访问网络共享路径 {path}。错误: {e}")
+            logging.exception(f"警告: 无法访问网络共享路径 {path}。错误: {e}")
 
     logging.info("所有配置的共享路径均不可用。")
     return None
@@ -175,7 +182,7 @@ def copy_to_share(file: Path, share_path: Path):
 
         logging.info(f"\n成功复制到: {destination_file}")
     except Exception as e:
-        logging.info(f"\n警告: 复制到共享目录失败，已忽略。错误: {e}")
+        logging.exception(f"\n警告: 复制到共享目录失败，已忽略。错误: {e}")
 
 
 def copy_dir_to_share(source_dir: Path, share_path: Path, cleanup=True):
@@ -212,7 +219,7 @@ def copy_dir_to_share(source_dir: Path, share_path: Path, cleanup=True):
 
         logging.info(f"\n成功将目录复制到: {destination_dir}")
     except Exception as e:
-        logging.info(f"\n警告: 复制目录到共享位置失败，已忽略。错误: {e}")
+        logging.exception(f"\n警告: 复制目录到共享位置失败，已忽略。错误: {e}")
     else:
         if not cleanup:
             return
@@ -270,4 +277,4 @@ def clean_old_releases(keep: int = 2, zip_and_folder=True):
                 logging.info("没有需要清理的旧 ZIP 文件。")
 
     except Exception as e:
-        logging.info(f"警告: 清理旧的构建结果失败: {e}")
+        logging.exception(f"警告: 清理旧的构建结果失败: {e}")

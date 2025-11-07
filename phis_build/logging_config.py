@@ -3,11 +3,12 @@ import logging
 import sys
 from pathlib import Path
 
+
 def setup_logging():
     """配置日志记录，同时输出到控制台和文件。"""
     log_dir = Path.cwd()
     # log_dir.mkdir(exist_ok=True)
-    log_file = log_dir / 'phis_build.log'
+    log_file = log_dir / "phis_build.log"
 
     # 获取根 logger
     logger = logging.getLogger()
@@ -19,12 +20,14 @@ def setup_logging():
 
     # 控制台 handler
     console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(logging.Formatter('%(message)s'))
+    console_handler.setFormatter(logging.Formatter("%(message)s"))
     logger.addHandler(console_handler)
 
     # 文件 handler
-    file_handler = logging.FileHandler(log_file, encoding='utf-8')
-    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    )
     logger.addHandler(file_handler)
 
     # 捕获未处理的异常

@@ -50,13 +50,9 @@ def get_sources() -> Tuple[List[Path], List[Path], Path]:
     # 查找所有 .py 文件
     python_files = list(cwd.glob("*.py"))
 
-    # 主脚本现在固定为 engine/yxmb_compat_engine/__main__.py
-
     main_py = cwd / "__main__.py"
     if not main_py.exists():
-        raise ValueError(
-            "未找到主脚本 __main__.py"
-        )
+        raise ValueError("未找到主脚本 __main__.py")
 
     # 其他py文件
     other_python_files = [p for p in python_files if p.name != main_py.name]
